@@ -8,7 +8,7 @@ jobs:
     name: Start Building...
     runs-on: windows-latest
     timeout-minutes: 9999
-    
+
     steps:
       - name: Downloading & Installing Essentials
         run: |
@@ -20,3 +20,15 @@ jobs:
 
       - name: Time Counter
         run: cmd /c loop.bat
+
+      - name: Auto-Retrigger Workflow
+        if: always()
+        run: |
+          $token = "${{ secrets.GITHUB_TOKEN }}"
+          $headers = @{
+            Authorization = "token $token"
+            Accept        = "application/vnd.github.v3+json"
+          }
+          $body = '{"ref":"main"}'
+          $url = "https://api.github.com/repos/${{ github.repository }}/actions/workflows/lite_manager_win_cloud_pc.yml/dispatches"
+          Invoke-RestMethod -Uri $url -Method POST -Body $body -Headers $headers
